@@ -72,6 +72,8 @@ C:\Users\Public\patched_explorer.exe /c "echo AdversarySimulation"
 # 3. Perform cleanup
 remove-item C:\Users\Public\patched_explorer.exe
 
+![Sysmon Event ID 11 Capture](images/SysmonScreenshot.png)
+
 Incident Timeline Responses
 1. Detection: Sysmon intercepted the file creation anomaly and generated Event ID 11 (FileCreate).
 
