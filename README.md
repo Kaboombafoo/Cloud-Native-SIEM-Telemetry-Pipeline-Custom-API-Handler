@@ -63,13 +63,11 @@ Verified channel activation via Get-WinEvent before executing an agent service r
 🔬 Adversary Simulation & Validation Testing
 To test the resilience of the pipeline against defensive evasion mechanics, a high-severity indicator simulation was launched on the Windows host. This tested the file generation and execution pipeline out of an unauthorized administrative directory (C:\Users\Public).
 (Powershell)
-# 1. Stage duplicate binary inside unauthorized environment
+#1. Stage duplicate binary inside unauthorized environment
 copy C:\Windows\System32\cmd.exe C:\Users\Public\patched_explorer.exe
-
-# 2. Execute process to trigger severity alarm
+#2. Execute process to trigger severity alarm
 C:\Users\Public\patched_explorer.exe /c "echo AdversarySimulation"
-
-# 3. Perform cleanup
+#3. Perform cleanup
 remove-item C:\Users\Public\patched_explorer.exe
 
 ![Sysmon Event ID 11 Capture](images/SysmonScreenshot.png)
@@ -80,6 +78,13 @@ Incident Timeline Responses
 2. Analysis: The cloud manager parsed the payload, matched signature criteria, and assigned a critical Level 12 threat flag, mapping it to MITRE ATT&CK Technique T1105 (Ingress Tool Transfer).
 
 3. Distribution: The custom Python script instantly fired, mapping the Level 12 state to a high-severity red embed card, landfalling the alert package into the Discord operations channel within three seconds of localized endpoint execution.
+
+🔍 Real-World Triage: False Positive Analysis
+During an idle monitoring period, a critical Level 12 alert (Rule 92058: Application Compatibility Database launched) fired on the endpoint. While this rule maps directly to MITRE ATT&CK T1546.011 (Application Shimming)—a common persistence tactic used by adversaries—a deep forensic audit of the JSON payload confirmed it was a benign false positive.
+
+The telemetry proved the process was initiated by the native Windows Program Compatibility Assistant Service (PcaSvc) using maintenance flags (-m -bg) under the NT AUTHORITY\SYSTEM context. This exercise highlighted the critical operational need for continuous rule tuning to minimize alert fatigue in production environments.
+
+![Wazuh Manager Raw JSON Log Audit](images/TerminalAlertsScreenshot.png)
 
 ---
 
