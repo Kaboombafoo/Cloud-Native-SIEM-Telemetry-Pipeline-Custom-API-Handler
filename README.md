@@ -32,15 +32,15 @@ This project demonstrates the design, deployment, and optimization of a cloud-na
 
 ---
 
-🔧 Engineering Obstacles & Triage Chronicles
-💥 Challenge 1: Webhook Payload Drop (HTTP Response 400)
+## 🔧 Engineering Obstacles & Triage Chronicles
+# 💥 Challenge 1: Webhook Payload Drop (HTTP Response 400)
 Symptom: The integration engine logged failures when communicating with Discord's /slack compatibility endpoint.
 
 Root Cause: When processing Windows logs, certain rule sets generated an empty text body structure ("text": null). Discord's translation layer strictly rejects null entries or non-compliant time syntax, dropping the entire packet.
 
 Resolution: Scrapped the legacy compatibility wrapper entirely. Engineered a native Python script to directly populate clean Discord schema arrays, integrating fallback string values to gracefully handle unpopulated data blocks.
 
-🕵️‍♂️ Challenge 2: Bash Shell Script Syntax Faults
+# 🕵️‍♂️ Challenge 2: Bash Shell Script Syntax Faults
 Symptom: The manager integration tool crashed on execution with Syntax error: "(" unexpected and import: not found.
 
 Root Cause: Running file /var/ossec/integrations/slack classified the target as a generic POSIX shell script instead of a Python executable. Hidden carriage returns (\r) and UTF-8 Byte Order Marks (BOM) were introduced via clipboard buffer caching, which completely blinded the Linux kernel to the python shebang line, forcing it to fallback to standard Bash.
@@ -50,7 +50,7 @@ Resolution: Re-wrote the script structure utilizing a direct sudo tee stream to 
 (Bash) sudo sed -i '1s/^\xef\xbb\xbf//; s/\r$//' /var/ossec/integrations/slack
 This immediately re-established proper system classification: Python script, ASCII text executable.
 
-🚫 Challenge 3: Host Subscription Failure (Error 15007)
+# 🚫 Challenge 3: Host Subscription Failure (Error 15007)
 Symptom: Endpoint agent logs displayed initialization blocks: ERROR: Could not EvtSubscribe() for Microsoft-Windows-Sysmon/Operational.
 
 Root Cause: The local Windows event manager error maps to ERROR_EVT_CHANNEL_NOT_FOUND. The background service installer had loaded the raw binary but had failed to register its underlying log provider manifest with the host OS.
@@ -60,26 +60,26 @@ Resolution: Launched an elevated Administrator shell instance, purged stale soft
 (powershell).\Sysmon64.exe -i sysmonconfig-export.xml -accepteula
 Verified channel activation via Get-WinEvent before executing an agent service recycle to bind the subscription handle.
 
-🔬 Adversary Simulation & Validation Testing
+# 🔬 Adversary Simulation & Validation Testing
 To test the resilience of the pipeline against defensive evasion mechanics, a high-severity indicator simulation was launched on the Windows host. This tested the file generation and execution pipeline out of an unauthorized administrative directory (C:\Users\Public).
 (Powershell)
-#1. Stage duplicate binary inside unauthorized environment
+1. Stage duplicate binary inside unauthorized environment
 copy C:\Windows\System32\cmd.exe C:\Users\Public\patched_explorer.exe
-#2. Execute process to trigger severity alarm
+2. Execute process to trigger severity alarm
 C:\Users\Public\patched_explorer.exe /c "echo AdversarySimulation"
-#3. Perform cleanup
+3. Perform cleanup
 remove-item C:\Users\Public\patched_explorer.exe
 
 ![Sysmon Event ID 11 Capture](images/SysmonScreenshot.png)
 
-Incident Timeline Responses
+# Incident Timeline Responses
 1. Detection: Sysmon intercepted the file creation anomaly and generated Event ID 11 (FileCreate).
 
 2. Analysis: The cloud manager parsed the payload, matched signature criteria, and assigned a critical Level 12 threat flag, mapping it to MITRE ATT&CK Technique T1105 (Ingress Tool Transfer).
 
 3. Distribution: The custom Python script instantly fired, mapping the Level 12 state to a high-severity red embed card, landfalling the alert package into the Discord operations channel within three seconds of localized endpoint execution.
 
-🔍 Real-World Triage: False Positive Analysis
+## 🔍 Real-World Triage: False Positive Analysis
 During an idle monitoring period, a critical Level 12 alert (Rule 92058: Application Compatibility Database launched) fired on the endpoint. While this rule maps directly to MITRE ATT&CK T1546.011 (Application Shimming)—a common persistence tactic used by adversaries—a deep forensic audit of the JSON payload confirmed it was a benign false positive.
 
 The telemetry proved the process was initiated by the native Windows Program Compatibility Assistant Service (PcaSvc) using maintenance flags (-m -bg) under the NT AUTHORITY\SYSTEM context. This exercise highlighted the critical operational need for continuous rule tuning to minimize alert fatigue in production environments.
