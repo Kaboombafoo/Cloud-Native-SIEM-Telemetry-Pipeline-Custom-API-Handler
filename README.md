@@ -3,6 +3,8 @@
 ## 📋 Project Overview
 This project demonstrates the design, deployment, and optimization of a cloud-native Security Information and Event Management (SIEM) telemetry pipeline. The architecture links a local Windows 11 endpoint to an enterprise-grade log collection engine hosted in the cloud, utilizing kernel-level event auditing to capture advanced host manipulation tactics. High-severity threats are surgically parsed and distributed to an operational engineering channel via a custom Python 3 native API integration.
 
+![Real-Time Discord Alert Card](images/DiscordScreenshot.png)
+
 ### Key Infrastructure Capabilities
 - **Proactive Boundary Telemetry:** Secure, cross-platform log transport spanning cloud perimeters and local endpoints.
 - **Kernel-Level Audit Depth:** Advanced process, network, and file integrity tracing via Microsoft Sysmon.
